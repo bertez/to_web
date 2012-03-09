@@ -1,0 +1,23 @@
+usage: to_web.py [-h] --videos VIDEOS [VIDEOS ...] [--output-dir OUTPUT_DIR]
+                 [--width WIDTH] [--height HEIGHT] [--video-bitrate VIDEOBR]
+                 [--audio-bitrate AUDIOBR] [--disable-mp4] [--disable-ogv]
+                 [--version]
+
+Example usage: to_web.py --videos video1.avi video2.avi --width 960 --height
+540 --output-dir upload
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --videos VIDEOS [VIDEOS ...]
+                        Video to process. You can add multiple.
+  --output-dir OUTPUT_DIR
+                        Output directory. Path. Default: videos_to_web
+  --width WIDTH         Output video width. Number. Default: 1280
+  --height HEIGHT       Output video height. Number. Default: 720
+  --video-bitrate VIDEOBR
+                        Output video bitrate. Number. Default: 1500
+  --audio-bitrate AUDIOBR
+                        Output audio bitrate. Number. Default: 128
+  --disable-mp4         Do not generate the mp4 file.
+  --disable-ogv         Do not generate the ogv file
+  --version             show program's version number and exit
