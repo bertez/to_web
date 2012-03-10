@@ -1,4 +1,5 @@
 0.2
+* Size bug (SOLVED)
 * Logging
 * Support for webm
 * Support for --no-confirm
