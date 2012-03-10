@@ -67,7 +67,7 @@ class BatchProcess(object):
                 for cmd in command:
                     subp = cmd.format(video, final_file, self.width, self.height, self.videobr, self.audiobr)
 
-                    print subp
+                    #print subp
 
 
                     pcommand = shlex.split(subp)
