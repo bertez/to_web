@@ -8,7 +8,7 @@ class BatchProcess(object):
 	"""Esta clase recolle unha serie de argumentos e procesa os videos"""
 
 	__author__ = 'Berto Yáñez'
-    __version__ = '0.1'
+	__version__ = '0.1'
 
 	encodings = {
 		'mp4' : ['ffmpeg -i {0} -pass 1 -vcodec libx264 -vpre fast_firstpass -b {4}k -bt {4}k -threads 4 -s {2}x{3} -f rawvideo -an -y /dev/null','ffmpeg -i {0} -pass 2 -acodec libfaac -ab {5}k -ac 2 -vcodec libx264 -vpre slow -b {4}k -bt {4}k -threads 4 -s {2}x{3} {1}'],
