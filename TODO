@@ -1,0 +1,5 @@
+0.2
+* Logging
+* Support for webm
+* Support for --no-confirm
+* Check for deps
