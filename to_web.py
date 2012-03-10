@@ -7,6 +7,8 @@ from glob import glob
 class BatchProcess(object):
 	"""Esta clase recolle unha serie de argumentos e procesa os videos"""
 
+	__author__ = 'Berto Yáñez'
+
 	encodings = {
 		'mp4' : ['ffmpeg -i {0} -pass 1 -vcodec libx264 -vpre fast_firstpass -b {4}k -bt {4}k -threads 4 -s {2}x{3} -f rawvideo -an -y /dev/null','ffmpeg -i {0} -pass 2 -acodec libfaac -ab {5}k -ac 2 -vcodec libx264 -vpre slow -b {4}k -bt {4}k -threads 4 -s {2}x{3} {1}'],
 		'ogv' : ['ffmpeg2theora -V {4} -A {5} -x {2} -y {3} --two-pass {0} -o {1}']
