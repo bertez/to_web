@@ -8,8 +8,8 @@ class BatchProcess(object):
 	"""Esta clase recolle unha serie de argumentos e procesa os videos"""
 
 	encodings = {
-		'mp4' : 'ffmpeg -i {0} -pass 1 -vcodec libx264 -vpre fast_firstpass -b {4}k -bt {4}k -threads 4 -s {2}x{3} -f rawvideo -an -y /dev/null && ffmpeg -i {0} -pass 2 -acodec libfaac -ab {5}k -ac 2 -vcodec libx264 -vpre slow -b {4}k -bt {4}k -threads 4 -s {2}x{3} {1}',
-		'ogv' : 'ffmpeg2theora -V {4} -A {5} -x {2} -y {3} --two-pass {0} -o {1}'
+		'mp4' : ['ffmpeg -i {0} -pass 1 -vcodec libx264 -vpre fast_firstpass -b {4}k -bt {4}k -threads 4 -s {2}x{3} -f rawvideo -an -y /dev/null','ffmpeg -i {0} -pass 2 -acodec libfaac -ab {5}k -ac 2 -vcodec libx264 -vpre slow -b {4}k -bt {4}k -threads 4 -s {2}x{3} {1}'],
+		'ogv' : ['ffmpeg2theora -V {4} -A {5} -x {2} -y {3} --two-pass {0} -o {1}']
 		}
 
 	localDir = os.getcwd()
@@ -69,32 +69,32 @@ class BatchProcess(object):
 			video_output = os.path.splitext(os.path.basename(video))[0]
 
 			for finalformat, command in self.encodings.items():
-				final_file = self.outputdir+ os.sep + video_output + '.' + finalformat
-				command =  self.encodings[finalformat].format(video, final_file, self.width, self.height, self.videobr, self.audiobr)
+				final_file = self.outputdir + os.sep + video_output + '.' + finalformat
+				for cmd in command:
+					subp = cmd.format(video, final_file, self.width, self.height, self.videobr, self.audiobr)
 			
-				print command
-				import shlex
-				import subprocess as sub
+					print subp
 
-				pcommand = shlex.split(command)
+					import shlex
+					import subprocess as sub
 
-				sys.exit(pcommand)
+					pcommand = shlex.split(subp)
+
+					proc = sub.Popen(pcommand, stdout=sub.PIPE, stderr=sub.PIPE)
+					out, err = proc.communicate()
+
+					print err
+					#if os.system(command) == 0:
+					# 	print final_file, ' has been processed successfully'
+					# else:
+					# 	self.errors.append('There was an error processing %s' % final_file)
 				
-				proc = sub.Popen(pcommand, stdout=sub.PIPE, stderr=sub.PIPE)
-				out, err = proc.communicate()
-
-				print err
-			 # 	if os.system(command) == 0:
-				# 	print final_file, ' has been processed successfully'
-				# else:
-				# 	self.errors.append('There was an error processing %s' % final_file)
-				
-			if len(self.errors) == 0:
-				print "\n\nEverything went fine :)"
-			else:
-				print "You should check this:\n"
-				for error in self.errors:
-					print error+'\n'
+		if len(self.errors) == 0:
+			print "\n\nEverything went fine :)"
+		else:
+			print "You should check this:\n"
+			for error in self.errors:
+				print error+'\n'
 
 	def __repr__(self):
 		return """
