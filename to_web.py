@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import sys, os
+import shlex
+import subprocess as sub
 
 class BatchProcess(object):
     """This class processes a list of videos to video formats usable by modern browsers (mp4 and ogv)"""
@@ -18,8 +20,6 @@ class BatchProcess(object):
     errors = []
 
     def __init__(self, arguments, output_dir, width, height, disable_mp4, disable_ogv, videobr, audiobr):
-
-        assert len(arguments) > 0, 'no files to process'
 
         self.filelist = self.create_file_list(arguments)
         self.target_dir = output_dir
@@ -48,14 +48,7 @@ class BatchProcess(object):
         _all_files = []
 
         for arg in arguments:
-            # if '*' in arg or '?' in arg:
-            # 	#o argumento ten unha wildcard
-            # 	_all_files.extend(glob(arg))
-            # elif os.path.isdir(arg):
-            # 	#o argumento é un directorio
-            # 	_all_files.extend(glob(os.path.join(arg,'*')))
             if os.path.isfile(arg):
-                #parece que é un ficheiro
                 _all_files.append(arg)
             else:
                 print '%s is not a valid file to process' % arg
@@ -76,15 +69,15 @@ class BatchProcess(object):
 
                     print subp
 
-                    import shlex
-                    import subprocess as sub
 
                     pcommand = shlex.split(subp)
 
-                    proc = sub.Popen(pcommand, stdout=sub.PIPE, stderr=sub.PIPE)
-                    out, err = proc.communicate()
+                    print pcommand
 
-                    print err
+                    #proc = sub.Popen(pcommand, stdout=sub.PIPE, stderr=sub.PIPE)
+                    #out, err = proc.communicate()
+
+                    #print err
 
         if len(self.errors) == 0:
             print "\n\nEverything went fine :)"
