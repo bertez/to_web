@@ -12,12 +12,18 @@ class BatchProcess(object):
     __version__ = '0.1'
 
     encodings = {
-            'mp4' : ['ffmpeg -i {0} -pass 1 -vcodec libx264 -vpre fast_firstpass -b {4}k -bt {4}k -threads 4 -s {2}x{3} -f rawvideo -an -y /dev/null','ffmpeg -i {0} -pass 2 -acodec libfaac -ab {5}k -ac 2 -vcodec libx264 -vpre slow -b {4}k -bt {4}k -threads 4 -s {2}x{3} {1}'],
-            'ogv' : ['ffmpeg2theora -V {4} -A {5} -x {2} -y {3} --two-pass {0} -o {1}']
+            'mp4' : ['ffmpeg -y -i {0} -pass 1 -vcodec libx264 -vpre fast_firstpass -b {3}k -bt {4}k -threads 4 {2}-f rawvideo -an -y /dev/null','ffmpeg -y -i {0} -pass 2 -acodec libfaac -ab {4}k -ac 2 -vcodec libx264 -vpre slow -b {3}k -bt {3}k -threads 4 {2}{1}'],
+            'ogv' : ['ffmpeg2theora -V {3} -A {4} {2}--two-pass {0} -o {1}']
+            }
+
+    wh_patterns = {
+            'mp4' : '-s {0}x{1} ',
+            'ogv' : '-x {0} -y {1} '
             }
 
     localDir = os.getcwd()
-    errors = []
+    errors = {}
+    logs = {}
 
     def __init__(self, arguments, output_dir, width, height, disable_mp4, disable_ogv, videobr, audiobr):
 
@@ -60,48 +66,71 @@ class BatchProcess(object):
 
     def process(self):
         for video in self.filelist:
+            self.errors[video] =  []
+            self.logs[video] = []
+
             video_output = os.path.splitext(os.path.basename(video))[0]
+            print 'Processing', video
+            print '---'*10
+
+            self.logs[video].append('Starting process of %s' % video)
 
             for finalformat, command in self.encodings.items():
+                print 'Creating %s file' % finalformat
+
                 final_file = self.outputdir + os.sep + video_output + '.' + finalformat
                 for cmd in command:
-                    subp = cmd.format(video, final_file, self.width, self.height, self.videobr, self.audiobr)
 
-                    #print subp
+                    wh_string = "" if self.width is None or self.height is None else self.wh_patterns[finalformat].format(self.width, self.height)
+                    subp = cmd.format(video, final_file, wh_string , self.videobr, self.audiobr)
 
+                    self.logs[video].append(subp)
 
-                    pcommand = shlex.split(subp)
+                    try:
+                        pipe = sub.Popen(shlex.split(subp), stderr=sub.PIPE, stdin=None)
+                    except OSError:
+                        self.errors[video].append('System error. Check dependencies.')
+                    except ValueError:
+                        self.errors[video].append('FFmpeg error. Sorry')
 
-                    print pcommand
+                    while True:
+                        line = pipe.stderr.readline()
+                        if line != '':
+                            self.logs[video].append(pipe.stderr.readline())
+                        else:
+                            break
+                    print self.logs[video]
 
-                    #proc = sub.Popen(pcommand, stdout=sub.PIPE, stderr=sub.PIPE)
-                    #out, err = proc.communicate()
-
-                    #print err
-
-        if len(self.errors) == 0:
+        if len(self.errors[video]) == 0:
             print "\n\nEverything went fine :)"
         else:
-            print "You should check this:\n"
-            for error in self.errors:
+            print "There were errors:\n"
+            for error in self.errors[video]:
                 print error+'\n'
 
     def __repr__(self):
-        return """
+        resize_info = 'The videos will not be resized' if self.width is None or self.height is None else 'The output video(s) will be this size: {0}x{1}'.format(self.width, self.height)
+
+        batch_info = """
 
     This video(s) will be processed: {0}
-    The output video(s) will be this size: {1}x{2}
-    Video bitrate will be: {3}kbps
-    Audio bitrate will be: {4}kbps
-    You'll find the compressed videos here: {5}
+    {1}
+    Video bitrate will be: {2}kbps
+    Audio bitrate will be: {3}kbps
+    You'll find the compressed videos here: {4}
 
-        """.format(str(self.filelist), self.width, self.height, self.videobr, self.audiobr, self.outputdir)
+        """.format(str(self.filelist), resize_info, self.videobr, self.audiobr, self.outputdir)
+
+        return batch_info
+
 
 if __name__ == '__main__':
 
     import argparse
 
     parser = argparse.ArgumentParser(description="Example usage: to_web.py --videos video1.avi video2.avi --width 960 --height 540 --output-dir upload")
+
+    group = parser.add_argument_group('resize')
 
     parser.add_argument('--videos', action='store', dest='videos', default=[], required = True,
                         help='Video to process. You can add multiple.', nargs='+'
@@ -110,11 +139,11 @@ if __name__ == '__main__':
     parser.add_argument('--output-dir', action='store', dest='output_dir', default='videos_to_web',
                         help='Output directory. Path. Default: videos_to_web')
 
-    parser.add_argument('--width', action='store', dest='width', default=1280,
-            help='Output video width. Number. Default: 1280', type=int)
+    group.add_argument('--width', action='store', dest='width', default=None,
+            help='Output video width. Number.', type=int)
 
-    parser.add_argument('--height', action='store', dest='height', default=720,
-            help='Output video height. Number. Default: 720', type=int)
+    group.add_argument('--height', action='store', dest='height', default=None,
+            help='Output video height. Number.', type=int)
 
     parser.add_argument('--video-bitrate', action='store', dest='videobr', default=1500,
             help='Output video bitrate. Number. Default: 1500', type=int)
