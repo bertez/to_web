@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys, os
+import sys, os, time
 import shlex
 import subprocess as sub
 
@@ -65,9 +65,13 @@ class BatchProcess(object):
             sys.exit("No files to process")
 
     def process(self):
+        logfile = open(self.outputdir + os.sep + str(time.time()) +'_job.log', 'w') 
+        errorfile = open(self.outputdir + os.sep + str(time.time()) +'errors_job.log', 'w') 
+
         for video in self.filelist:
             self.errors[video] =  []
             self.logs[video] = []
+
 
             video_output = os.path.splitext(os.path.basename(video))[0]
             print 'Processing', video
@@ -76,37 +80,36 @@ class BatchProcess(object):
             self.logs[video].append('Starting process of %s' % video)
 
             for finalformat, command in self.encodings.items():
-                print 'Creating %s file' % finalformat
+                print 'Creating %s file. Be patient.' % finalformat
 
                 final_file = self.outputdir + os.sep + video_output + '.' + finalformat
                 for cmd in command:
 
-                    wh_string = "" if self.width is None or self.height is None else self.wh_patterns[finalformat].format(self.width, self.height)
+                    wh_string = "" if self.width is None or self.height is None else self.wh_patterns[finalformat].format(self.width, self.height) + ' '
                     subp = cmd.format(video, final_file, wh_string , self.videobr, self.audiobr)
 
                     self.logs[video].append(subp)
 
                     try:
-                        pipe = sub.Popen(shlex.split(subp), stderr=sub.PIPE, stdin=None)
+                       pipe = sub.Popen(shlex.split(subp), stderr=sub.PIPE)
                     except OSError:
                         self.errors[video].append('System error. Check dependencies.')
                     except ValueError:
                         self.errors[video].append('FFmpeg error. Sorry')
 
-                    while True:
-                        line = pipe.stderr.readline()
-                        if line != '':
-                            self.logs[video].append(pipe.stderr.readline())
-                        else:
-                            break
-                    print self.logs[video]
+                    self.logs[video].extend(pipe.stderr.readlines())
+
+            logfile.writelines(self.logs[video])
+            errorfile.writelines(self.errors[video])
 
         if len(self.errors[video]) == 0:
-            print "\n\nEverything went fine :)"
+            print "\nEverything went fine :)\n"
         else:
-            print "There were errors:\n"
+            print "\nThere were errors:\n"
             for error in self.errors[video]:
                 print error+'\n'
+        logfile.close()
+        errorfile.close()
 
     def __repr__(self):
         resize_info = 'The videos will not be resized' if self.width is None or self.height is None else 'The output video(s) will be this size: {0}x{1}'.format(self.width, self.height)
