@@ -29,14 +29,21 @@ class BatchProcess(object):
 
         self.filelist = self.create_file_list(arguments)
         self.target_dir = output_dir
+
         self.width = width
         self.height = height
+
         self.disable_mp4 = disable_mp4
         self.disable_ogv = disable_ogv
+
         self.videobr = videobr
         self.audiobr = audiobr
 
         self.outputdir = os.path.join(self.localDir, self.target_dir)
+
+        self.logfile = self.outputdir + os.sep + str(time.time()) +'_job.log'
+        self.errorfile = self.outputdir + os.sep + str(time.time()) +'_errors_job.log'
+
 
         if not os.path.exists(self.outputdir):
             os.mkdir(self.outputdir)
@@ -65,8 +72,8 @@ class BatchProcess(object):
             sys.exit("No files to process")
 
     def process(self):
-        logfile = open(self.outputdir + os.sep + str(time.time()) +'_job.log', 'w') 
-        errorfile = open(self.outputdir + os.sep + str(time.time()) +'errors_job.log', 'w') 
+        logfile = open(self.logfile, 'w') 
+        errorfile = open(self.errorfile, 'w') 
 
         for video in self.filelist:
             self.errors[video] =  []
@@ -100,6 +107,7 @@ class BatchProcess(object):
                     self.logs[video].extend(pipe.stderr.readlines())
 
             logfile.writelines(self.logs[video])
+            logfile.write('\n'*3)
             errorfile.writelines(self.errors[video])
 
         if len(self.errors[video]) == 0:
