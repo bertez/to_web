@@ -4,3 +4,4 @@
 * Support for webm
 * Support for --no-confirm
 * Check for deps
+* Use ffmpeg for all encodings

@@ -33,6 +33,7 @@ class BatchProcess(object):
         self.width = width
         self.height = height
 
+
         self.disable_mp4 = disable_mp4
         self.disable_ogv = disable_ogv
 
@@ -54,7 +55,7 @@ class BatchProcess(object):
         if self.disable_mp4:
             del self.encodings['mp4']
 
-        if len(self.encodings) == 0:
+        if not len(self.encodings):
             sys.exit("Exiting. Nothing to do.")
 
     def create_file_list(self, arguments):
@@ -72,8 +73,8 @@ class BatchProcess(object):
             sys.exit("No files to process")
 
     def process(self):
-        logfile = open(self.logfile, 'w') 
-        errorfile = open(self.errorfile, 'w') 
+        logfile = open(self.logfile, 'w')
+        errorfile = open(self.errorfile, 'w')
 
         for video in self.filelist:
             self.errors[video] =  []
