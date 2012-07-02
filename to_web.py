@@ -82,6 +82,7 @@ class BatchProcess(object):
 
 
             video_output = os.path.splitext(os.path.basename(video))[0]
+            pring '\n'
             print 'Processing', video
             print '---'*10
 
