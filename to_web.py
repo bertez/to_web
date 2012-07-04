@@ -6,20 +6,20 @@ import shlex
 import subprocess as sub
 
 class BatchProcess(object):
-  """This class processes a list of videos to video formats usable by modern browsers (mp4 and ogv)"""
+    """This class processes a list of videos to video formats usable by modern browsers (mp4 and ogv)"""
 
     __author__ = 'Berto Yáñez'
     __version__ = '0.1'
 
     encodings = {
-        'mp4' : ['ffmpeg -y -i {0} -pass 1 -vcodec libx264 -vpre fast_firstpass -b {3}k -bt {4}k -threads 4 {2}-f rawvideo -an -y /dev/null','ffmpeg -y -i {0} -pass 2 -acodec libfaac -ab {4}k -ac 2 -vcodec libx264 -vpre slow -b {3}k -bt {3}k -threads 4 {2}{1}'],
-        'ogv' : ['ffmpeg2theora -V {3} -A {4} {2}--two-pass {0} -o {1}']
-        }
+            'mp4' : ['ffmpeg -y -i {0} -pass 1 -vcodec libx264 -vpre fast_firstpass -b {3}k -bt {4}k -threads 4 {2}-f rawvideo -an -y /dev/null','ffmpeg -y -i {0} -pass 2 -acodec libfaac -ab {4}k -ac 2 -vcodec libx264 -vpre slow -b {3}k -bt {3}k -threads 4 {2}{1}'],
+            'ogv' : ['ffmpeg2theora -V {3} -A {4} {2}--two-pass {0} -o {1}']
+            }
 
     wh_patterns = {
-        'mp4' : '-s {0}x{1} ',
-        'ogv' : '-x {0} -y {1} '
-        }
+            'mp4' : '-s {0}x{1} ',
+            'ogv' : '-x {0} -y {1} '
+            }
 
     localDir = os.getcwd()
     errors = {}
@@ -27,7 +27,7 @@ class BatchProcess(object):
 
     def __init__(self, arguments, output_dir, width, height, disable_mp4, disable_ogv, videobr, audiobr):
 
-      self.filelist = self.create_file_list(arguments)
+        self.filelist = self.create_file_list(arguments)
         self.target_dir = output_dir
 
         self.width = width
@@ -47,37 +47,37 @@ class BatchProcess(object):
 
 
         if not os.path.exists(self.outputdir):
-          os.mkdir(self.outputdir)
+            os.mkdir(self.outputdir)
 
         if self.disable_ogv:
-          del self.encodings['ogv']
+            del self.encodings['ogv']
 
         if self.disable_mp4:
-          del self.encodings['mp4']
+            del self.encodings['mp4']
 
         if not len(self.encodings):
-          sys.exit("Exiting. Nothing to do.")
+            sys.exit("Exiting. Nothing to do.")
 
     def create_file_list(self, arguments):
-      _all_files = []
+        _all_files = []
 
         for arg in arguments:
-          if os.path.isfile(arg):
-            _all_files.append(arg)
-          else:
-            print '%s is not a valid file to process' % arg
+            if os.path.isfile(arg):
+                _all_files.append(arg)
+            else:
+                print '%s is not a valid file to process' % arg
 
         if len(_all_files) > 0:
-          return _all_files
+            return _all_files
         else:
-          sys.exit("No files to process")
+            sys.exit("No files to process")
 
     def process(self):
-      logfile = open(self.logfile, 'w')
+        logfile = open(self.logfile, 'w')
         errorfile = open(self.errorfile, 'w')
 
         for video in self.filelist:
-          self.errors[video] =  []
+            self.errors[video] =  []
             self.logs[video] = []
 
 
@@ -88,24 +88,22 @@ class BatchProcess(object):
             self.logs[video].append('Starting process of %s' % video)
 
             for finalformat, command in self.encodings.items():
-              print 'Creating %s file. Be patient.' % finalformat
+                print 'Creating %s file. Be patient.' % finalformat
 
                 final_file = self.outputdir + os.sep + video_output + '.' + finalformat
                 for cmd in command:
 
-                  wh_string = "" if self.width is None or self.height is None else self.wh_patterns[finalformat].format(self.width, self.height) + ' '
+                    wh_string = "" if self.width is None or self.height is None else self.wh_patterns[finalformat].format(self.width, self.height) + ' '
                     subp = cmd.format(video, final_file, wh_string , self.videobr, self.audiobr)
-
-        print subp
 
                     self.logs[video].append(subp)
 
                     try:
-                      pipe = sub.Popen(shlex.split(subp), stderr=sub.PIPE)
+                       pipe = sub.Popen(shlex.split(subp), stderr=sub.PIPE)
                     except OSError:
-                      self.errors[video].append('System error. Check dependencies.')
+                        self.errors[video].append('System error. Check dependencies.')
                     except ValueError:
-                      self.errors[video].append('FFmpeg error. Sorry')
+                        self.errors[video].append('FFmpeg error. Sorry')
 
                     self.logs[video].extend(pipe.stderr.readlines())
 
@@ -114,16 +112,16 @@ class BatchProcess(object):
             errorfile.writelines(self.errors[video])
 
         if len(self.errors[video]) == 0:
-          print "\nEverything went fine :)\n"
+            print "\nEverything went fine :)\n"
         else:
-          print "\nThere were errors:\n"
+            print "\nThere were errors:\n"
             for error in self.errors[video]:
-              print error+'\n'
+                print error+'\n'
         logfile.close()
         errorfile.close()
 
     def __repr__(self):
-      resize_info = 'The videos will not be resized' if self.width is None or self.height is None else 'The output video(s) will be this size: {0}x{1}'.format(self.width, self.height)
+        resize_info = 'The videos will not be resized' if self.width is None or self.height is None else 'The output video(s) will be this size: {0}x{1}'.format(self.width, self.height)
 
         batch_info = """
 
@@ -140,38 +138,38 @@ class BatchProcess(object):
 
 if __name__ == '__main__':
 
-  import argparse
+    import argparse
 
     parser = argparse.ArgumentParser(description="Example usage: to_web.py --videos video1.avi video2.avi --width 960 --height 540 --output-dir upload")
 
     group = parser.add_argument_group('resize')
 
     parser.add_argument('--videos', action='store', dest='videos', default=[], required = True,
-        help='Video to process. You can add multiple.', nargs='+'
-        )
+                        help='Video to process. You can add multiple.', nargs='+'
+                        )
 
     parser.add_argument('--output-dir', action='store', dest='output_dir', default='videos_to_web',
-        help='Output directory. Path. Default: videos_to_web')
+                        help='Output directory. Path. Default: videos_to_web')
 
     group.add_argument('--width', action='store', dest='width', default=None,
-        help='Output video width. Number.', type=int)
+            help='Output video width. Number.', type=int)
 
     group.add_argument('--height', action='store', dest='height', default=None,
-        help='Output video height. Number.', type=int)
+            help='Output video height. Number.', type=int)
 
     parser.add_argument('--video-bitrate', action='store', dest='videobr', default=1500,
-        help='Output video bitrate. Number. Default: 1500', type=int)
+            help='Output video bitrate. Number. Default: 1500', type=int)
 
     parser.add_argument('--audio-bitrate', action='store', dest='audiobr', default=128,
-        help='Output audio bitrate. Number. Default: 128', type=int)
+            help='Output audio bitrate. Number. Default: 128', type=int)
 
     parser.add_argument('--disable-mp4', action='store_true', default=False,
-        dest='disable_mp4',
-        help='Do not generate the mp4 file.')
+            dest='disable_mp4',
+            help='Do not generate the mp4 file.')
 
     parser.add_argument('--disable-ogv', action='store_true', default=False,
-        dest='disable_ogv',
-        help='Do not generate the ogv file')
+            dest='disable_ogv',
+            help='Do not generate the ogv file')
 
     parser.add_argument('--version', action='version', version='%(prog)s 0.1 by @bertez')
 
@@ -184,7 +182,6 @@ if __name__ == '__main__':
     print 'Batch process info: ', my_batch
 
     if raw_input("Does this looks ok to you? [Y/N]: ") == "Y":
-      my_batch.process()
+        my_batch.process()
     else:
-      sys.exit('Exiting...')
-
+        sys.exit('Exiting...')
