@@ -99,7 +99,7 @@ class BatchProcess(object):
                     self.logs[video].append(subp)
 
                     try:
-                       pipe = sub.Popen(shlex.split(subp), stderr=sub.PIPE)
+                        pipe = sub.Popen(shlex.split(subp), stderr=sub.PIPE)
                     except OSError:
                         self.errors[video].append('System error. Check dependencies.')
                     except ValueError:
@@ -145,11 +145,11 @@ if __name__ == '__main__':
     group = parser.add_argument_group('resize')
 
     parser.add_argument('--videos', action='store', dest='videos', default=[], required = True,
-                        help='Video to process. You can add multiple.', nargs='+'
-                        )
+            help='Video to process. You can add multiple.', nargs='+'
+            )
 
     parser.add_argument('--output-dir', action='store', dest='output_dir', default='videos_to_web',
-                        help='Output directory. Path. Default: videos_to_web')
+            help='Output directory. Path. Default: videos_to_web')
 
     group.add_argument('--width', action='store', dest='width', default=None,
             help='Output video width. Number.', type=int)
