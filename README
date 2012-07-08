@@ -23,3 +23,5 @@ optional arguments:
 resize:
   --width WIDTH         Output video width. Number.
   --height HEIGHT       Output video height. Number.
+
+(work in progress)
