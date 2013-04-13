@@ -13,7 +13,7 @@ class BatchProcess(object):
     browsers (mp4 and ogv)"""
 
     __author__ = 'Berto Yáñez'
-    __version__ = '0.1'
+    __version__ = '0.2'
 
     encodings = {
         'mp4': ['ffmpeg -y -i {0} -pass 1 -vcodec libx264 -vpre \
